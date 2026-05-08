@@ -1,0 +1,9 @@
+# Paths are relative to the Paper server folder unless absolute paths are used.
+events-log-path: "data/events/player_events.jsonl"
+content-books-path: "content/lore_books"
+
+# Chat logging can expose private player conversation. Keep it off by default.
+log-chat: false
+
+# How many events /aidm recent keeps in memory after startup.
+recent-event-limit: 10

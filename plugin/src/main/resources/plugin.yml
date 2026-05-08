@@ -1,0 +1,15 @@
+name: AIDungeonMasterObserver
+version: ${version}
+main: com.hazel.aidm.AIDungeonMasterObserver
+api-version: "1.21"
+author: Hazel
+description: Logs safe Minecraft gameplay events and loads AI-generated lore book JSON.
+commands:
+  aidm:
+    description: AI Dungeon Master observer commands.
+    usage: /aidm <status|reloadcontent|givebook|listbooks|recent>
+    permission: aidm.admin
+permissions:
+  aidm.admin:
+    description: Allows use of AIDungeonMasterObserver commands.
+    default: op

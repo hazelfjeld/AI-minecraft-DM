@@ -1,0 +1,38 @@
+# Minecraft server/runtime folders. Keep live worlds out of Git.
+world/
+world_nether/
+world_the_end/
+logs/
+crash-reports/
+cache/
+libraries/
+versions/
+backups/
+
+# Server-local config and downloaded binaries.
+eula.txt
+server.properties
+*.jar
+!plugin/build/libs/*.jar
+
+# Build outputs.
+plugin/.gradle/
+plugin/build/
+plugin/out/
+
+# Python/editor noise.
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Local logs/temp files.
+*.log
+*.tmp
+
+# OS/editor files.
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
