@@ -4,6 +4,8 @@ This MVP assumes the Paper server folder is also the Git checkout folder, or tha
 
 - `data/events/player_events.jsonl`
 - `content/lore_books`
+- `content/events`
+- `content/structures`
 
 ## 1. Install Paper
 
@@ -58,3 +60,16 @@ log-chat: false
 ```
 
 Only set it to `true` if players understand chat may be written to Git-tracked logs.
+
+High-risk event safety defaults are also stored there:
+
+```yaml
+highRiskMinSpawnDistance: 500
+highRiskMaxSpawnDistance: 5000
+allowHighRiskBeyondMaxSpawnDistance: false
+requireApprovalForHighRisk: true
+requireRollbackForHighRisk: true
+maxHighRiskStructureBlocks: 5000
+```
+
+Keep these defaults until you have tested high-risk event placement on a disposable world.

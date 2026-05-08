@@ -23,6 +23,8 @@ plugin/                 Paper plugin source
 ai_dm/                  Python lore generator
 data/events/            JSONL gameplay event logs
 content/lore_books/     Generated book JSON loaded by the plugin
+content/events/         Generated event package JSON loaded by the plugin
+content/structures/     JSON block structures referenced by event packages
 scripts/                Windows workflow helpers
 docs/                   Setup and workflow notes
 ```
@@ -70,7 +72,50 @@ Chat logging is off by default. You can enable it in `plugins/AIDungeonMasterObs
 /aidm listbooks
 /aidm givebook <player> <book_id>
 /aidm recent
+/aidm reloadevents
+/aidm listevents
+/aidm eventinfo <event_id>
+/aidm previewevent <event_id>
+/aidm approveevent <event_id>
+/aidm startevent <event_id>
+/aidm cancellevent <event_id>
+/aidm rollbackevent <event_id>
 ```
+
+## High-Risk Event Safety
+
+High-risk event packages can place generated structure content, so they are fenced off from spawn.
+
+The plugin measures horizontal X/Z distance from the target location to the world's spawn. Y height does not count. By default, a high-risk event must be at least 500 blocks from spawn and no more than 5000 blocks from spawn.
+
+If a high-risk event is too close, `/aidm startevent` refuses it with:
+
+```text
+Denied: high-risk events must be at least 500 blocks from spawn.
+```
+
+High-risk events also require approval and rollback snapshots by default. The safety config is in `plugins/AIDungeonMasterObserver/config.yml`:
+
+```yaml
+highRiskMinSpawnDistance: 500
+highRiskMaxSpawnDistance: 5000
+allowHighRiskBeyondMaxSpawnDistance: false
+requireApprovalForHighRisk: true
+requireRollbackForHighRisk: true
+maxHighRiskStructureBlocks: 5000
+```
+
+Use this flow:
+
+```text
+/aidm reloadevents
+/aidm previewevent <event_id>
+/aidm approveevent <event_id>
+/aidm startevent <event_id>
+/aidm rollbackevent <event_id>
+```
+
+The 500-block spawn safety zone exists so AI-generated high-risk structures cannot accidentally damage the main base, spawn hub, starter farms, player storage, or other shared infrastructure.
 
 ## Run The Python Lore Generator
 
@@ -78,6 +123,12 @@ Mock mode needs no API key:
 
 ```bat
 python ai_dm\run_dm.py --mode mock
+```
+
+Mock mode can also generate a sample high-risk event package and a tiny JSON block structure:
+
+```bat
+python ai_dm\run_dm.py --mode mock --generate-high-risk-event
 ```
 
 Optional LLM mode:
@@ -118,6 +169,7 @@ Then in Minecraft:
 ```
 
 More detail is in [docs/GITHUB_WORKFLOW.md](docs/GITHUB_WORKFLOW.md).
+High-risk event details are in [docs/HIGH_RISK_EVENTS.md](docs/HIGH_RISK_EVENTS.md).
 
 ## First Successful Test
 
@@ -140,6 +192,17 @@ python ai_dm\run_dm.py --mode mock
 /aidm givebook Hazel <book_id>
 ```
 
+To test a generated event package:
+
+```text
+/aidm reloadevents
+/aidm listevents
+/aidm previewevent <event_id>
+/aidm approveevent <event_id>
+/aidm startevent <event_id>
+/aidm rollbackevent <event_id>
+```
+
 ## Backups
 
 World folders are intentionally ignored by Git. Use this local helper before risky server changes:
@@ -159,3 +222,4 @@ It copies `world/`, `world_nether/`, and `world_the_end/` into a timestamped fol
 - No automated review queue yet.
 - The Java plugin uses a hardcoded notable block list for now.
 - LLM mode is optional and depends on the `openai` Python package.
+- Structure support is intentionally limited to known `json_blocks` files.

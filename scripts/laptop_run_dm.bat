@@ -11,13 +11,20 @@ echo [AIDM] Running Python AI Dungeon Master...
 python ai_dm\run_dm.py --mode mock %*
 if errorlevel 1 exit /b %errorlevel%
 
-echo [AIDM] Staging generated lore books...
-if not exist content\lore_books\*.json (
-  echo [AIDM] No lore book JSON files found to push.
+echo [AIDM] Staging generated content...
+set HAS_GENERATED_CONTENT=
+if exist content\lore_books\*.json set HAS_GENERATED_CONTENT=1
+if exist content\events\*.json set HAS_GENERATED_CONTENT=1
+if exist content\structures\*.json set HAS_GENERATED_CONTENT=1
+
+if not defined HAS_GENERATED_CONTENT (
+  echo [AIDM] No generated JSON content found to push.
   exit /b 0
 )
 
-git add content\lore_books\*.json
+if exist content\lore_books\*.json git add content\lore_books\*.json
+if exist content\events\*.json git add content\events\*.json
+if exist content\structures\*.json git add content\structures\*.json
 
 git diff --cached --quiet
 if not errorlevel 1 (

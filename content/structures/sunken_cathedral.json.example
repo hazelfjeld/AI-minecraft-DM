@@ -1,0 +1,23 @@
+{
+  "id": "sunken_cathedral",
+  "blocks": [
+    {
+      "dx": 0,
+      "dy": 0,
+      "dz": 0,
+      "material": "STONE_BRICKS"
+    },
+    {
+      "dx": 1,
+      "dy": 0,
+      "dz": 0,
+      "material": "CRACKED_STONE_BRICKS"
+    },
+    {
+      "dx": 0,
+      "dy": 1,
+      "dz": 0,
+      "material": "LANTERN"
+    }
+  ]
+}

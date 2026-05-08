@@ -1,0 +1,23 @@
+{
+  "id": "event_001_sunken_cathedral",
+  "title": "The Sunken Cathedral",
+  "story_arc": "arc_first_bell",
+  "description": "A dangerous AI-generated story event.",
+  "risk_level": "high",
+  "requires_approval": true,
+  "location": {
+    "mode": "fixed",
+    "world": "world",
+    "x": 700,
+    "y": 64,
+    "z": 0,
+    "radius_min": 500,
+    "radius_max": 2000
+  },
+  "structure": {
+    "type": "json_blocks",
+    "structure_id": "sunken_cathedral"
+  },
+  "lore_books": ["book_id_here"],
+  "tags": ["high_risk", "boss", "structure"]
+}

@@ -22,6 +22,8 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_EVENTS_PATH = REPO_ROOT / "data" / "events" / "player_events.jsonl"
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "content" / "lore_books"
+DEFAULT_EVENT_OUTPUT_DIR = REPO_ROOT / "content" / "events"
+DEFAULT_STRUCTURE_OUTPUT_DIR = REPO_ROOT / "content" / "structures"
 DEFAULT_PROMPT_PATH = REPO_ROOT / "ai_dm" / "prompts" / "lore_prompt.txt"
 
 
@@ -30,16 +32,28 @@ def main() -> int:
     parser.add_argument("--mode", choices=["mock", "llm"], default="mock", help="mock needs no API key; llm uses OPENAI_API_KEY.")
     parser.add_argument("--events", type=Path, default=DEFAULT_EVENTS_PATH, help="Path to player_events.jsonl.")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_DIR, help="Directory for lore book JSON files.")
+    parser.add_argument("--events-output", type=Path, default=DEFAULT_EVENT_OUTPUT_DIR, help="Directory for event package JSON files.")
+    parser.add_argument("--structures-output", type=Path, default=DEFAULT_STRUCTURE_OUTPUT_DIR, help="Directory for structure JSON files.")
     parser.add_argument("--prompt", type=Path, default=DEFAULT_PROMPT_PATH, help="Prompt template used by llm mode.")
     parser.add_argument("--limit", type=int, default=50, help="How many recent events to read.")
     parser.add_argument("--count", type=int, default=2, help="Number of books to request, from 1 to 3.")
+    parser.add_argument("--generate-high-risk-event", action="store_true", help="Also write one safe high-risk event package and JSON block structure.")
     parser.add_argument("--force", action="store_true", help="Overwrite existing lore JSON files with the same id.")
     args = parser.parse_args()
 
     requested_count = max(1, min(args.count, 3))
     recent_events = read_recent_events(args.events, args.limit)
     if not recent_events:
-        print(f"No events found at {args.events}. Join the server or trigger a notable event first.")
+        if args.generate_high_risk_event:
+            print(f"No events found at {args.events}. Generating high-risk event from empty context.")
+            write_mock_high_risk_event(
+                recent_events=[],
+                event_output_dir=args.events_output,
+                structure_output_dir=args.structures_output,
+                force=args.force,
+            )
+        else:
+            print(f"No events found at {args.events}. Join the server or trigger a notable event first.")
         return 0
 
     if args.mode == "mock":
@@ -60,6 +74,14 @@ def main() -> int:
             written_count += 1
         else:
             skipped_count += 1
+
+    if args.generate_high_risk_event:
+        write_mock_high_risk_event(
+            recent_events=recent_events,
+            event_output_dir=args.events_output,
+            structure_output_dir=args.structures_output,
+            force=args.force,
+        )
 
     print(f"Done. Wrote {written_count} lore book(s), skipped {skipped_count} existing file(s).")
     return 0
@@ -270,6 +292,72 @@ def write_lore_book(book: dict[str, Any], output_dir: Path, force: bool) -> bool
     return True
 
 
+def write_mock_high_risk_event(
+    recent_events: list[dict[str, Any]],
+    event_output_dir: Path,
+    structure_output_dir: Path,
+    force: bool,
+) -> None:
+    """Write a deterministic high-risk event package plus a tiny safe structure."""
+    players = sorted({str(event.get("player", "Someone")) for event in recent_events if event.get("player")})
+    source_events = source_event_ids(recent_events)
+    fingerprint = hashlib.sha1("|".join(source_events).encode("utf-8")).hexdigest()[:8]
+    event_id = f"event_{datetime.now(timezone.utc).strftime('%Y%m%d')}_sunken_cathedral_{fingerprint}"
+    structure_id = f"{event_id}_structure"
+
+    event_package = {
+        "id": event_id,
+        "title": "The Sunken Cathedral",
+        "story_arc": "arc_first_bell",
+        "description": f"A dangerous story event awakened by {name_list(players)}.",
+        "risk_level": "high",
+        "requires_approval": True,
+        "location": {
+            "mode": "fixed",
+            "world": "world",
+            "x": 700,
+            "y": 64,
+            "z": 0,
+            "radius_min": 500,
+            "radius_max": 2000,
+        },
+        "structure": {
+            "type": "json_blocks",
+            "structure_id": structure_id,
+        },
+        "lore_books": [],
+        "tags": ["high_risk", "structure", "sunken_cathedral"],
+    }
+
+    structure = {
+        "id": structure_id,
+        "blocks": [
+            {"dx": 0, "dy": 0, "dz": 0, "material": "STONE_BRICKS"},
+            {"dx": 1, "dy": 0, "dz": 0, "material": "CRACKED_STONE_BRICKS"},
+            {"dx": -1, "dy": 0, "dz": 0, "material": "MOSSY_STONE_BRICKS"},
+            {"dx": 0, "dy": 1, "dz": 0, "material": "LANTERN"},
+            {"dx": 0, "dy": 0, "dz": 1, "material": "CHISELED_STONE_BRICKS"},
+        ],
+    }
+
+    event_output_dir.mkdir(parents=True, exist_ok=True)
+    structure_output_dir.mkdir(parents=True, exist_ok=True)
+    write_json_file(event_output_dir / f"{event_id}.json", event_package, force)
+    write_json_file(structure_output_dir / f"{structure_id}.json", structure, force)
+
+
+def write_json_file(path: Path, data: dict[str, Any], force: bool) -> bool:
+    if path.exists() and not force:
+        print(f"Skipping existing file: {path}")
+        return False
+
+    with path.open("w", encoding="utf-8") as output_file:
+        json.dump(data, output_file, indent=2, ensure_ascii=False)
+        output_file.write("\n")
+    print(f"Wrote {path}")
+    return True
+
+
 def build_book(theme: str, title: str, pages: list[str], tags: list[str], source_events: list[str]) -> dict[str, Any]:
     return {
         "id": make_book_id(theme, title, source_events),
@@ -346,6 +434,8 @@ def default_llm_prompt() -> str:
         "You are generating safe Minecraft D&D lore books.\n"
         "Return only JSON: an array of {count} objects with id, title, author, pages, tags, source_events.\n"
         "Do not suggest server commands, code, plugins, shell commands, or direct world edits.\n"
+        "High-risk events must be placed at least 500 blocks away from spawn. "
+        "The plugin will reject invalid locations.\n"
         "Base the lore only on these events:\n{events_json}\n"
     )
 

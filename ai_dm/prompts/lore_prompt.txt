@@ -19,6 +19,7 @@ Safety rules:
 - Do not describe direct live-world edits.
 - Only create lore text that can safely become an in-game written book.
 - Use the actual players, event types, locations, deaths, biomes, or notable blocks from the input.
+- High-risk events must be placed at least 500 blocks away from spawn. The plugin will reject invalid locations.
 
 Recent events:
 {events_json}

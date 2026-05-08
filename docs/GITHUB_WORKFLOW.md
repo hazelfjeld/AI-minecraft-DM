@@ -12,6 +12,8 @@ The laptop reads those logs and writes safe generated content:
 
 ```text
 content/lore_books/*.json
+content/events/*.json
+content/structures/*.json
 ```
 
 The AI does not directly touch the live server or write plugin code in this MVP.
@@ -36,7 +38,9 @@ Then in Minecraft:
 
 ```text
 /aidm reloadcontent
+/aidm reloadevents
 /aidm listbooks
+/aidm listevents
 ```
 
 ## Laptop AI Loop
@@ -53,7 +57,8 @@ This pulls latest server logs, runs:
 python ai_dm\run_dm.py --mode mock
 ```
 
-Then it commits and pushes any new `content/lore_books/*.json` files.
+Then it commits and pushes any new generated JSON content.
+If you pass `--generate-high-risk-event`, it also writes `content/events/*.json` and `content/structures/*.json`.
 
 ## Optional LLM Mode
 

@@ -1,9 +1,22 @@
 # Paths are relative to the Paper server folder unless absolute paths are used.
 events-log-path: "data/events/player_events.jsonl"
 content-books-path: "content/lore_books"
+content-events-path: "content/events"
+content-structures-path: "content/structures"
+approvals-path: "data/approvals/approved_events.json"
+rollbacks-path: "data/rollbacks"
 
 # Chat logging can expose private player conversation. Keep it off by default.
 log-chat: false
 
 # How many events /aidm recent keeps in memory after startup.
 recent-event-limit: 10
+
+# High-risk generated events are only allowed far away from spawn.
+# Distance uses horizontal X/Z distance from the target to the world's spawn.
+highRiskMinSpawnDistance: 500
+highRiskMaxSpawnDistance: 5000
+allowHighRiskBeyondMaxSpawnDistance: false
+requireApprovalForHighRisk: true
+requireRollbackForHighRisk: true
+maxHighRiskStructureBlocks: 5000
