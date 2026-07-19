@@ -223,3 +223,13 @@ It copies `world/`, `world_nether/`, and `world_the_end/` into a timestamped fol
 - The Java plugin uses a hardcoded notable block list for now.
 - LLM mode is optional and depends on the `openai` Python package.
 - Structure support is intentionally limited to known `json_blocks` files.
+
+## Paper Server Performance
+
+This project runs on Paper, so collect evidence before changing plugins or server configuration when TPS drops or tick time spikes.
+
+- Read the free [Minecraft Spark profiler guide](https://tps-rescue-hazel.airheadhazelnut.chatgpt.site/guides/minecraft-spark-profiler) for a capture-and-interpretation workflow.
+- Use the repository's [Paper performance troubleshooting checklist](docs/TPS_RESCUE.md) for safe log redaction, measurement, and rollback reminders.
+- If the profile still needs a second set of eyes, [open a private TPS Rescue request](https://tps-rescue-hazel.airheadhazelnut.chatgpt.site/request).
+
+TPS Rescue is operated by this repository owner. The optional review is a flat $39, uses only customer-provided redacted Spark and mclo.gs links, requires no server credentials, and does not guarantee a particular TPS result. Scope is accepted before payment.
